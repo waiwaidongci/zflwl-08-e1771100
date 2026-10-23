@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "weight_policy": {
+    "version": 1,
+    "basis": "business_priority",
+    "core_min_share": 0.5
+  },
+  "gate_tests": [
+    "test_outputs.py::test_gate_maps_every_peak_to_a_distinct_line"
+  ],
+  "tests": {
+    "test_outputs.py::test_six_frame_spectral_subsets_are_identified": {
+      "weight": 0.13,
+      "priority": "core",
+      "rationale": "六帧谱线子集和多普勒速度同时复原，是夜班自动认线的最低业务闭环。"
+    },
+    "test_outputs.py::test_eight_frame_catalog_association_is_complete": {
+      "weight": 0.13,
+      "priority": "core",
+      "rationale": "八帧全峰覆盖检验多个未知子集能否在同一目录与容差下稳定识别。"
+    },
+    "test_outputs.py::test_doppler_velocity_is_recovered_from_many_lines": {
+      "weight": 0.13,
+      "priority": "core",
+      "rationale": "由整帧多线支持反演速度，避免单峰偶然对应生成错误的天体速度。"
+    },
+    "test_outputs.py::test_negative_velocity_limit_is_accepted": {
+      "weight": 0.13,
+      "priority": "core",
+      "rationale": "负速度上限是公开工作范围的重要边界，直接影响高速近邻天体的处理。"
+    },
+    "test_outputs.py::test_repeated_line_patterns_report_frame_ambiguity": {
+      "weight": 0.08,
+      "priority": "boundary",
+      "rationale": "重复谱线模式存在并列速度时必须拒发唯一答案，防止污染速度目录。"
+    },
+    "test_outputs.py::test_extra_catalog_key_is_refused": {
+      "weight": 0.08,
+      "priority": "schema",
+      "rationale": "严格顶层键集合可阻止错误导出版本混入观测目录并改变匹配语义。"
+    },
+    "test_outputs.py::test_success_output_is_compact_sorted_and_newline_terminated": {
+      "weight": 0.07,
+      "priority": "supporting",
+      "rationale": "稳定的结果序列化便于归档系统按字节复核夜间批量处理结果。"
+    },
+    "test_outputs.py::test_positive_velocity_limit_exceeded_is_refused": {
+      "weight": 0.08,
+      "priority": "boundary",
+      "rationale": "超过公开速度上限的整帧必须拒收，避免把无关峰位误认成高速谱线。"
+    },
+    "test_outputs.py::test_equal_pixel_positions_are_refused": {
+      "weight": 0.09,
+      "priority": "boundary",
+      "rationale": "重复像素峰位会破坏一对一指派，必须在进入谱线认线前拒收坏帧。"
+    },
+    "test_outputs.py::test_zero_dispersion_is_refused": {
+      "weight": 0.08,
+      "priority": "schema",
+      "rationale": "零色散会把全部像素折叠到同一波长，必须在标定解析阶段停止处理。"
+    }
+  }
+}
