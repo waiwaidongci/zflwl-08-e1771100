@@ -8,14 +8,24 @@ from pathlib import Path
 
 
 ENTRY = os.environ.get("LINE_LINKER", "/app/link_lines.py")
+
+SAFE_ENV = {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "/tmp",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONHASHSEED": "0",
+}
 C_KM_S = 299792.458
 
 
 def _run(payload: Path, output: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, ENTRY, str(payload), str(output)],
+        [sys.executable, "-S", "-P", "-B", ENTRY, str(payload), str(output)],
         text=True,
         capture_output=True,
+        env=SAFE_ENV,
         timeout=30,
         check=False,
     )
@@ -158,6 +168,34 @@ def test_negative_velocity_limit_is_accepted(tmp_path: Path) -> None:
     assert completed.returncode == 0
     assert result["frames"]["FRAME-000"]["velocity_kms"] == -300.0
     assert result["frames"]["FRAME-000"]["line_matches"] == expected["FRAME-000"]["line_matches"], "CASE-SCHEMA-01 CASE-CAL-01 CASE-VELOCITY-01 CASE-FRAME-03"
+
+
+def test_zero_pixel_position_is_accepted(tmp_path: Path) -> None:
+    """题面：
+    「`pixel_positions` 是 16 到 28 个有限数，必须严格递增且不小于 0。」
+    """
+
+    # CASE-PIXEL-02
+    payload, expected = _payload(6)
+    for exposure in payload["exposures"]:
+        first = exposure["pixel_positions"][0]
+        exposure["calibration"]["pixel_zero"] += (
+            first * exposure["calibration"]["nm_per_pixel"]
+        )
+        exposure["pixel_positions"] = [
+            position - first for position in exposure["pixel_positions"]
+        ]
+        assert abs(exposure["pixel_positions"][0]) <= 1e-12
+    source = tmp_path / "input.json"
+    output = tmp_path / "result.json"
+    _write_json(source, payload)
+    completed = _run(source, output)
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert completed.returncode == 0
+    assert completed.stdout == ""
+    assert completed.stderr == ""
+    assert result["status"] == "ok"
+    assert result["frames"] == expected
 
 
 def test_repeated_line_patterns_report_frame_ambiguity(tmp_path: Path) -> None:

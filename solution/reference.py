@@ -95,9 +95,12 @@ def parse_payload(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]
         raw_positions = item.get("pixel_positions")
         if not isinstance(raw_positions, list) or not 16 <= len(raw_positions) <= 28:
             raise Refused("pixel_positions must contain 16 to 28 peaks")
-        positions = [
-            _number(value, "pixel position", positive=True) for value in raw_positions
-        ]
+        positions = []
+        for value in raw_positions:
+            position = _number(value, "pixel position")
+            if position < 0.0:
+                raise Refused("pixel position is outside its domain")
+            positions.append(position)
         if any(positions[index] >= positions[index + 1] for index in range(len(positions) - 1)):
             raise Refused("pixel positions must be strictly increasing")
         exposures.append(

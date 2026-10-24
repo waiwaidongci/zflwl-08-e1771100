@@ -10,24 +10,29 @@
   ],
   "tests": {
     "test_outputs.py::test_six_frame_spectral_subsets_are_identified": {
-      "weight": 0.13,
+      "weight": 0.10,
       "priority": "core",
       "rationale": "六帧谱线子集和多普勒速度同时复原，是夜班自动认线的最低业务闭环。"
     },
     "test_outputs.py::test_eight_frame_catalog_association_is_complete": {
-      "weight": 0.13,
+      "weight": 0.10,
       "priority": "core",
       "rationale": "八帧全峰覆盖检验多个未知子集能否在同一目录与容差下稳定识别。"
     },
     "test_outputs.py::test_doppler_velocity_is_recovered_from_many_lines": {
-      "weight": 0.13,
+      "weight": 0.11,
       "priority": "core",
       "rationale": "由整帧多线支持反演速度，避免单峰偶然对应生成错误的天体速度。"
     },
     "test_outputs.py::test_negative_velocity_limit_is_accepted": {
-      "weight": 0.13,
+      "weight": 0.11,
       "priority": "core",
       "rationale": "负速度上限是公开工作范围的重要边界，直接影响高速近邻天体的处理。"
+    },
+    "test_outputs.py::test_zero_pixel_position_is_accepted": {
+      "weight": 0.10,
+      "priority": "core",
+      "rationale": "零像素是公开允许的合法谱峰位置，参考实现与验收必须同样接受，不能静默拒收整帧。"
     },
     "test_outputs.py::test_repeated_line_patterns_report_frame_ambiguity": {
       "weight": 0.08,
